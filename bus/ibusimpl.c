@@ -591,7 +591,7 @@ bus_ibus_impl_init (BusIBusImpl *ibus)
     ibus->use_sys_layout = TRUE;
     ibus->embed_preedit_text = TRUE;
     ibus->enable_by_default = TRUE;
-    ibus->use_global_engine = FALSE;
+    ibus->use_global_engine = TRUE;
     ibus->global_engine = NULL;
     ibus->global_previous_engine_name = NULL;
 
