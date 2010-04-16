@@ -86,6 +86,7 @@ struct _BusIBusImpl {
 
     gboolean use_global_engine;
     BusEngineProxy  *global_engine;
+    gchar           *global_previous_engine_name;
 };
 
 struct _BusIBusImplClass {
@@ -107,6 +108,14 @@ IBusHotkeyProfile
                 *bus_ibus_impl_get_hotkey_profile   (BusIBusImpl        *ibus);
 IBusKeymap      *bus_ibus_impl_get_keymap           (BusIBusImpl        *ibus);
 BusRegistry     *bus_ibus_impl_get_registry         (BusIBusImpl        *ibus);
+
+gboolean         bus_ibus_impl_filter_keyboard_shortcuts
+                                                    (BusIBusImpl        *ibus,
+                                                     BusInputContext    *context,
+                                                     guint               keyval,
+                                                     guint               modifiers,
+                                                     guint               prev_keyval,
+                                                     guint               prev_modifiers);
 
 G_END_DECLS
 #endif
