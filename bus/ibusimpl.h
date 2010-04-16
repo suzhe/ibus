@@ -75,6 +75,7 @@ struct _BusIBusImpl {
 
     gboolean use_sys_layout;
     gboolean embed_preedit_text;
+    gboolean enable_by_default;
 
     BusRegistry     *registry;
 

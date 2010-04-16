@@ -71,6 +71,9 @@ static void     bus_ibus_impl_set_use_sys_layout
 static void     bus_ibus_impl_set_embed_preedit_text
                                                 (BusIBusImpl        *ibus,
                                                  GValue             *value);
+static void     bus_ibus_impl_set_enable_by_default
+                                                (BusIBusImpl        *ibus,
+                                                 GValue             *value);
 
 static void     bus_ibus_impl_set_use_global_engine
                                                 (BusIBusImpl        *ibus,
@@ -254,13 +257,21 @@ bus_ibus_impl_set_use_sys_layout (BusIBusImpl *ibus,
 }
 
 static void
-bus_ibus_impl_set_embed_preedit_text (BusIBusImpl        *ibus,
-                                      GValue             *value)
+bus_ibus_impl_set_embed_preedit_text (BusIBusImpl *ibus,
+                                      GValue      *value)
 {
     if (value != NULL && G_VALUE_TYPE (value) == G_TYPE_BOOLEAN) {
         ibus->embed_preedit_text = g_value_get_boolean (value);
     }
+}
 
+static void
+bus_ibus_impl_set_enable_by_default (BusIBusImpl *ibus,
+                                     GValue      *value)
+{
+    if (value != NULL && G_VALUE_TYPE (value) == G_TYPE_BOOLEAN) {
+        ibus->enable_by_default = g_value_get_boolean (value);
+    }
 }
 
 static void
@@ -385,6 +396,7 @@ bus_ibus_impl_reload_config (BusIBusImpl *ibus)
         { "general", "use_system_keyboard_layout", bus_ibus_impl_set_use_sys_layout },
         { "general", "use_global_engine", bus_ibus_impl_set_use_global_engine },
         { "general", "embed_preedit_text", bus_ibus_impl_set_embed_preedit_text },
+        { "general", "enable_by_default", bus_ibus_impl_set_enable_by_default },
     };
 
     for (i = 0; i < G_N_ELEMENTS (entries); i++) {
@@ -422,13 +434,14 @@ _config_value_changed_cb (IBusConfig  *config,
         gchar *key;
         void ( *func) (BusIBusImpl *, GValue *);
     } entries [] = {
-        { "general/hotkey", "trigger",     bus_ibus_impl_set_trigger },
+        { "general/hotkey", "trigger", bus_ibus_impl_set_trigger },
         { "general/hotkey", "next_engine_in_menu", bus_ibus_impl_set_next_engine_in_menu },
         { "general/hotkey", "previous_engine", bus_ibus_impl_set_previous_engine },
         { "general", "preload_engines",    bus_ibus_impl_set_preload_engines },
         { "general", "use_system_keyboard_layout", bus_ibus_impl_set_use_sys_layout },
         { "general", "use_global_engine", bus_ibus_impl_set_use_global_engine },
         { "general", "embed_preedit_text", bus_ibus_impl_set_embed_preedit_text },
+        { "general", "enable_by_default", bus_ibus_impl_set_enable_by_default },
     };
 
     for (i = 0; i < G_N_ELEMENTS (entries); i++) {
@@ -575,8 +588,9 @@ bus_ibus_impl_init (BusIBusImpl *ibus)
     ibus->hotkey_profile = ibus_hotkey_profile_new ();
     ibus->keymap = ibus_keymap_get ("us");
 
-    ibus->use_sys_layout = FALSE;
+    ibus->use_sys_layout = TRUE;
     ibus->embed_preedit_text = TRUE;
+    ibus->enable_by_default = TRUE;
     ibus->use_global_engine = FALSE;
     ibus->global_engine = NULL;
     ibus->global_previous_engine_name = NULL;
@@ -1152,6 +1166,10 @@ _ibus_create_input_context (BusIBusImpl     *ibus,
                           signals[i].name,
                           signals[i].callback,
                           ibus);
+    }
+
+    if (ibus->enable_by_default) {
+        bus_input_context_enable (context);
     }
 
     path = ibus_service_get_path ((IBusService *) context);
