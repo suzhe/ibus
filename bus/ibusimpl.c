@@ -717,6 +717,9 @@ _ibus_introspect (BusIBusImpl     *ibus,
         "      <arg name=\"data\" direction=\"in\" type=\"v\"/>\n"
         "      <arg name=\"data\" direction=\"out\" type=\"v\"/>\n"
         "    </method>\n"
+        "    <method name=\"GetUseSysLayout\">\n"
+        "      <arg name=\"enable\" direction=\"out\" type=\"b\"/>\n"
+        "    </method>\n"
         "    <signal name=\"RegistryChanged\">\n"
         "    </signal>\n"
         "  </interface>\n"
@@ -1427,6 +1430,22 @@ _ibus_ping (BusIBusImpl     *ibus,
     return reply;
 }
 
+static IBusMessage *
+_ibus_get_use_sys_layout (BusIBusImpl     *ibus,
+                          IBusMessage     *message,
+                          BusConnection   *connection)
+{
+    IBusMessage *reply;
+    IBusMessageIter src, dst;
+
+    reply = ibus_message_new_method_return (message);
+    ibus_message_append_args (reply,
+            G_TYPE_BOOLEAN, &ibus->use_sys_layout,
+            G_TYPE_INVALID);
+
+    return reply;
+}
+
 static gboolean
 bus_ibus_impl_ibus_message (BusIBusImpl     *ibus,
                             BusConnection   *connection,
@@ -1456,6 +1475,7 @@ bus_ibus_impl_ibus_message (BusIBusImpl     *ibus,
         { IBUS_INTERFACE_IBUS, "ListActiveEngines",     _ibus_list_active_engines },
         { IBUS_INTERFACE_IBUS, "Exit",                  _ibus_exit },
         { IBUS_INTERFACE_IBUS, "Ping",                  _ibus_ping },
+        { IBUS_INTERFACE_IBUS, "GetUseSysLayout",       _ibus_get_use_sys_layout },
     };
 
     ibus_message_set_sender (message, bus_connection_get_unique_name (connection));

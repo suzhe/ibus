@@ -68,6 +68,11 @@ class Panel(ibus.PanelBase):
         self.__data_dir = path.join(self.__prefix, "share", "ibus")
         # self.__icons_dir = path.join(self.__data_dir, "icons")
         self.__setup_cmd = path.join(self.__prefix, "bin", "ibus-setup")
+        self.__setxkbmap_cmd = path.join(self.__prefix, "bin", "setxkbmap")
+        self.__current_xkb_layout = ""
+        self.__default_xkb_layout = "us"
+        if bus.get_use_sys_layout():
+            self.__set_xkb_layout(self.__default_xkb_layout)
 
         # hanlder signal
         signal.signal(signal.SIGCHLD, self.__sigchld_cb)
@@ -205,14 +210,20 @@ class Panel(ibus.PanelBase):
         if not enabled:
             self.__set_im_icon(ICON_KEYBOARD)
             self.__set_im_name(None)
+            if self.__bus.get_use_sys_layout():
+                self.__set_xkb_layout(self.__default_xkb_layout)
         else:
             engine = self.__focus_ic.get_engine()
             if engine:
                 self.__set_im_icon(engine.icon)
                 self.__set_im_name(engine.longname)
+                if self.__bus.get_use_sys_layout():
+                    self.__set_xkb_layout(engine.layout)
             else:
                 self.__set_im_icon(ICON_KEYBOARD)
                 self.__set_im_name(None)
+                if self.__bus.get_use_sys_layout():
+                    self.__set_xkb_layout(self.__default_xkb_layout)
         self.__language_bar.focus_in()
 
     def focus_out(self, ic):
@@ -222,6 +233,8 @@ class Panel(ibus.PanelBase):
         self.__language_bar.focus_out()
         self.__set_im_icon(ICON_KEYBOARD)
         self.__set_im_name(None)
+        if self.__bus.get_use_sys_layout():
+            self.__set_xkb_layout(self.__default_xkb_layout)
 
     def state_changed(self):
         if not self.__focus_ic:
@@ -234,15 +247,20 @@ class Panel(ibus.PanelBase):
             self.reset()
             self.__set_im_icon(ICON_KEYBOARD)
             self.__set_im_name(None)
+            if self.__bus.get_use_sys_layout():
+                self.__set_xkb_layout(self.__default_xkb_layout)
         else:
             engine = self.__focus_ic.get_engine()
             if engine:
                 self.__set_im_icon(engine.icon)
                 self.__set_im_name(engine.longname)
+                if self.__bus.get_use_sys_layout():
+                    self.__set_xkb_layout(engine.layout)
             else:
                 self.__set_im_icon(ICON_KEYBOARD)
                 self.__set_im_name(None)
-
+                if self.__bus.get_use_sys_layout():
+                    self.__set_xkb_layout(self.__default_xkb_layout)
 
     def reset(self):
         self.__candidate_panel.reset()
@@ -518,3 +536,22 @@ class Panel(ibus.PanelBase):
             self.__setup_pid = 0
         self.__setup_pid = os.spawnl(os.P_NOWAIT, self.__setup_cmd, "ibus-setup")
 
+    def __set_xkb_layout(self, layout):
+        # if it's not a us keyboard layout, then we need to load us layout
+        # into the second group. Otherwise applications' key bindings may
+        # not work correctly.
+        if layout != "us" and not layout.startswith("us("):
+            layout = layout + ",us"
+
+        if self.__current_xkb_layout == layout:
+            return;
+
+        self.__current_xkb_layout = layout
+
+        # FIXME: It's an ugly hack. libxklavier might be used to make it more
+        # reliable.
+        try:
+            os.spawnv(os.P_WAIT, self.__setxkbmap_cmd,
+                      [ "setxkbmap", "-layout", layout ] )
+        except:
+            print >> sys.stderr, "Failed to run %s" % self.__setxkbmap_cmd
