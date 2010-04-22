@@ -661,7 +661,7 @@ _ic_process_key_event  (BusInputContext *context,
     g_assert (message != NULL);
     g_assert (BUS_IS_CONNECTION (connection));
 
-    IBusMessage *reply = NULL;
+    IBusMessage *reply;
     guint keyval, keycode, modifiers;
     gboolean retval;
     IBusError *error;
@@ -681,16 +681,24 @@ _ic_process_key_event  (BusInputContext *context,
         return reply;
     }
 
-    if (context->has_focus)
-        retval = bus_input_context_filter_keyboard_shortcuts (context, keyval, keycode, modifiers);
-
-    if (retval) {
-        reply = ibus_message_new_method_return (message);
-        ibus_message_append_args (reply,
-                                  G_TYPE_BOOLEAN, &retval,
-                                  G_TYPE_INVALID);
+    if (G_UNLIKELY (!context->has_focus)) {
+        /* workaround: set focus if context does not have focus */
+        bus_input_context_focus_in (context);
     }
-    else if (context->has_focus && context->enabled && context->engine) {
+
+    if (G_LIKELY (context->has_focus)) {
+        retval = bus_input_context_filter_keyboard_shortcuts (context, keyval, keycode, modifiers);
+        /* If it is keyboard shortcut, reply TRUE to client */
+        if (G_UNLIKELY (retval)) {
+            reply = ibus_message_new_method_return (message);
+            ibus_message_append_args (reply,
+                                      G_TYPE_BOOLEAN, &retval,
+                                      G_TYPE_INVALID);
+            return reply;
+        }
+    }
+
+    if (context->has_focus && context->enabled && context->engine) {
         CallData *call_data;
 
         call_data = g_slice_new (CallData);
@@ -707,14 +715,16 @@ _ic_process_key_event  (BusInputContext *context,
                                             modifiers,
                                             (GFunc) _ic_process_key_event_reply_cb,
                                             call_data);
+        return NULL;
     }
     else {
+        retval = FALSE;
         reply = ibus_message_new_method_return (message);
         ibus_message_append_args (reply,
                                   G_TYPE_BOOLEAN, &retval,
                                   G_TYPE_INVALID);
+        return reply;
     }
-    return reply;
 }
 
 static IBusMessage *

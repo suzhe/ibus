@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ibus.master.kn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-09 18:43+0800\n"
+"POT-Creation-Date: 2010-04-21 10:58+0800\n"
 "PO-Revision-Date: 2009-12-08 11:27+0530\n"
 "Last-Translator: Shankar Prasad <svenkate@redhat.com>\n"
 "Language-Team: Kannada <kde-l10n-kn@kde.org>\n"
@@ -25,7 +25,7 @@ msgstr "IBus"
 msgid "IBus input method framework"
 msgstr "IBus ಇನ್‌ಪುಟ್ ವಿಧಾನದ ಫ್ರೇಮ್‌ವರ್ಕ್"
 
-#: ../ibus/_config.py.in:37
+#: ../ibus/_config.py.in:38
 msgid ""
 "Copyright (c) 2007-2010 Peng Huang\n"
 "Copyright (c) 2007-2010 Red Hat, Inc."
@@ -287,7 +287,7 @@ msgstr "ಇನ್‌ಪುಟ್‌ ವಿಧಾನಗಳನ್ನು ಆಫ್ 
 msgid "Trigger shortcut keys"
 msgstr "ಶಾರ್ಟ್-ಕಟ್ ಕೀಲಿಗಳನ್ನು ಟ್ರಿಗರ್ ಮಾಡು"
 
-#: ../data/ibus.schemas.in.h:22 ../setup/setup.ui.h:53
+#: ../data/ibus.schemas.in.h:22
 msgid "Use custom font"
 msgstr "ಇಚ್ಛೆಯ ಅಕ್ಷರಶೈಲಿಯನ್ನು ಬಳಸಿ"
 
@@ -475,6 +475,11 @@ msgstr "ಮೇಲ್ಭಾಗದ ಎಡ ಮೂಲೆ"
 #: ../setup/setup.ui.h:52
 msgid "Top right corner"
 msgstr "ಮೇಲ್ಭಾಗದ ಬಲ ಮೂಲೆ"
+
+#: ../setup/setup.ui.h:53
+#, fuzzy
+msgid "Use custom font:"
+msgstr "ಇಚ್ಛೆಯ ಅಕ್ಷರಶೈಲಿಯನ್ನು ಬಳಸಿ"
 
 #: ../setup/setup.ui.h:56
 msgid "Vertical"
