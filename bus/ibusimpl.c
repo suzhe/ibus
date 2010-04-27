@@ -596,10 +596,10 @@ bus_ibus_impl_init (BusIBusImpl *ibus)
     ibus->hotkey_profile = ibus_hotkey_profile_new ();
     ibus->keymap = ibus_keymap_get ("us");
 
-    ibus->use_sys_layout = TRUE;
+    ibus->use_sys_layout = FALSE;
     ibus->embed_preedit_text = TRUE;
-    ibus->enable_by_default = TRUE;
-    ibus->use_global_engine = TRUE;
+    ibus->enable_by_default = FALSE;
+    ibus->use_global_engine = FALSE;
     ibus->global_engine = NULL;
     ibus->global_previous_engine_name = NULL;
 
