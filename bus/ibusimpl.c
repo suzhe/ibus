@@ -1130,6 +1130,20 @@ _context_destroy_cb (BusInputContext    *context,
     g_object_unref (context);
 }
 
+#if 0
+static void
+_context_enabled_cb (BusInputContext    *context,
+                     BusIBusImpl        *ibus)
+{
+}
+
+static void
+_context_disabled_cb (BusInputContext    *context,
+                      BusIBusImpl        *ibus)
+{
+}
+#endif
+
 static IBusMessage *
 _ibus_create_input_context (BusIBusImpl     *ibus,
                             IBusMessage     *message,
@@ -1170,6 +1184,10 @@ _ibus_create_input_context (BusIBusImpl     *ibus,
         { "focus-in",       G_CALLBACK (_context_focus_in_cb) },
         { "focus-out",      G_CALLBACK (_context_focus_out_cb) },
         { "destroy",        G_CALLBACK (_context_destroy_cb) },
+    #if 0
+        { "enabled",        G_CALLBACK (_context_enabled_cb) },
+        { "disabled",       G_CALLBACK (_context_disabled_cb) },
+    #endif
     };
 
     for (i = 0; i < G_N_ELEMENTS (signals); i++) {
@@ -1605,22 +1623,30 @@ bus_ibus_impl_filter_keyboard_shortcuts (BusIBusImpl     *ibus,
 
     if (event == trigger) {
         gboolean enabled = bus_input_context_is_enabled (context);
-
-        if (context->enabled) {
+        if (enabled) {
             bus_input_context_disable (context);
         }
         else {
             bus_input_context_enable (context);
         }
-
         return (enabled != bus_input_context_is_enabled (context));
     }
     if (event == next) {
-        bus_ibus_impl_context_request_next_engine_in_menu (ibus, context);
+        if (bus_input_context_is_enabled(context)) {
+            bus_ibus_impl_context_request_next_engine_in_menu (ibus, context);
+        }
+        else {
+            bus_input_context_enable (context);
+        }
         return TRUE;
     }
     if (event == previous) {
-        bus_ibus_impl_context_request_previous_engine (ibus, context);
+        if (bus_input_context_is_enabled(context)) {
+            bus_ibus_impl_context_request_previous_engine (ibus, context);
+        }
+        else {
+            bus_input_context_enable (context);
+        }
         return TRUE;
     }
     return FALSE;
